@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/vue.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="js/index.js"></script>
+    <script src="js/axios.js"></script>
+</head>
+<body>
+<div id="box">
+
+    <el-table :data="userList" style="width: 100%">
+        <el-table-column prop="name"   label="姓名" > </el-table-column>
+        <el-table-column prop="birthday"   label="年龄" >
+        </el-table-column>
+        <el-table-column prop="tel"   label="电话" > </el-table-column>
+        <el-table-column prop="sex" label="性别" > </el-table-column>
+        <el-table-column prop="role"    label="角色" >
+            <template slot-scope="scope">
+                <span v-if="scope.row.roel==0">教练</span>
+                <span v-else>学员</span>
+            </template>
+        </el-table-column>
+
+
+    </el-table>
+
+</div>
+
+<script type="text/javascript">
+    new Vue({
+        el:"#box",
+        data:{
+            userList:[],
+            nowDate:""
+        },
+        mounted:function(){
+            var that=this;
+            axios.get("selectAllUser").then(function(result){
+                if(result.data.statue){
+                    that.userList=result.data.list;
+                    that.nowDate=new Date().getFullYear();
+                }else {
+                    alert(result.data.message)
+                }
+
+            })
+        }
+    })
+</script>
+</body>
+</html>

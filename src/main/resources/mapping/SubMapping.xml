@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hs.HealthKeepFit.dao.SubDao">
+
+    <resultMap id="selectAllSub" type="com.hs.HealthKeepFit.bean.Subjects">
+        <id property="sid" column="sid"></id>
+        <result property="sname" column="sname"></result>
+        <result property="username" column="username"></result>
+        <result property="price" column="price"></result>
+        <result property="sdetail" column="sdetail"></result>
+        <result property="count" column="count"></result>
+        <result property="timg" column="timg"></result>
+        <association property="user" javaType="com.hs.HealthKeepFit.bean.User">
+            <id property="username" column="username"></id>
+            <result property="password" column="password"></result>
+            <result property="name" column="name"></result>
+            <result property="sex" column="sex"></result>
+            <result property="tel" column="tel"></result>
+            <result property="birthday" column="birthday"></result>
+        </association>
+
+    </resultMap>
+
+
+    <!--查询所有课程-->
+    <!--subjects:{sname:"动感单车",price:50,user:{name:"飞蓬",sex:"男"}}-->
+    <select id="selectAllSub" parameterType="com.hs.HealthKeepFit.bean.Condition" resultMap="selectAllSub">
+        select s.*,u.* from subjects as s,users as u where s.username=u.username limit #{currentPage},#{pageSize}
+    </select>
+
+    <!--查询课程数据总条目-->
+    <select id="selectAllSubByCondition" parameterType="com.hs.HealthKeepFit.bean.Condition" resultMap="selectAllSub">
+        select
+            s.*,u.* from subjects as s,users as u
+        <where>
+            s.username=u.username
+            <if test="sname!=null"><!--查Where,会自动忽略前后缀，如：and，or-->
+                and s.sname LIKE concat('%',#{sname},'%')<!--模糊查询-->
+            </if>
+            <if test="price!=0">
+                and s.price=#{price}
+            </if>
+            <if test="name!=null">
+                and u.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="count!=0">
+                and s.count=#{count}
+            </if>
+        </where>
+
+            limit #{currentPage},#{pageSize}
+    </select>
+
+    <!--查询课程数据总条目-->
+    <select id="selectCountSubByCondition" parameterType="com.hs.HealthKeepFit.bean.Condition" resultType="java.lang.Long">
+        select
+            count(1) as total
+        from
+            subjects as s,users as u
+        <where>
+            s.username=u.username
+            <if test="sname!=null"><!--查Where,会自动忽略前后缀，如：and，or-->
+                and s.sname LIKE concat('%',#{sname},'%')<!--模糊查询-->
+            </if>
+            <if test="price!=0">
+                and s.price=#{price}
+            </if>
+            <if test="name!=null">
+                and u.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="count!=0">
+                and s.count=#{count}
+            </if>
+        </where>
+    </select>
+
+    <!--查询课程数据总条目-->
+    <select id="selectCountSub" resultType="java.lang.Long">
+        select count(1) as total from subjects as s,users as u where s.username=u.username
+    </select>
+
+    <!--删除课程-->
+    <delete id="delSub" parameterType="java.lang.String">
+        delete from subjects where sid=#{sid}
+    </delete>
+
+    <!-- 创建课程 -->
+    <insert id="addSubject" parameterType="com.hs.HealthKeepFit.bean.Subjects">
+        insert into subjects (sid,sname,price,username,sdetail,count,timg) value (#{sid},#{sname},#{price},#{username},#{sdetail},#{count},#{timg})
+    </insert>
+
+
+</mapper>

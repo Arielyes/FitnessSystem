@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>课程管理</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/vue.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="js/index.js"></script>
+    <script src="js/axios.js"></script>
+</head>
+<body>
+<div id="box">
+
+    <el-form :inline="true" :model="condition" label-width="80px">
+
+        <el-form-item label="课程名称" >
+            <el-input v-model="condition.sname"></el-input>
+        </el-form-item>
+
+        <el-form-item label="课程单价">
+            <el-input v-model="condition.price"></el-input>
+        </el-form-item>
+
+        <el-form-item label="教练名称">
+            <el-input v-model="condition.name"></el-input>
+        </el-form-item>
+
+        <el-form-item label="参加人数">
+            <el-input v-model="condition.count"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button @click="search">搜索</el-button>
+        </el-form-item>
+
+    </el-form>
+
+    <el-table :data="subList" style="width: 100%">
+        <el-table-column prop="sname"   label="课程名称" > </el-table-column>
+        <el-table-column prop="price"   label="课程单价" > </el-table-column>
+        <el-table-column prop="user.name"   label="教练名称" > </el-table-column>
+        <el-table-column prop="sdetail" label="课程介绍" > </el-table-column>
+        <el-table-column prop="count"    label="参加人数" > </el-table-column>
+        <el-table-column prop="timg"    label="课程图片" >
+            <template slot-scope="scope">
+                <img :src="scope.row.timg" width="200px" height="80px"/>
+            </template>
+        </el-table-column>
+
+        <el-table-column fixed="right" label="操作" width="100">
+            <template slot-scope="scope">
+                <el-button type="text" size="small" @click="openDelPanel(scope.row.sid)">删除</el-button>
+            </template>
+        </el-table-column>
+
+    </el-table>
+
+    <el-dialog title="删除" :visible.sync="delVisible" width="30%" >
+        <span>确定删除吗？</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="delVisible = false">取 消</el-button>
+            <el-button type="primary" @click="delSub">确 定</el-button>
+        </span>
+    </el-dialog>
+
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10, 15, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total">
+    </el-pagination>
+
+</div>
+
+<script type="text/javascript">
+    new Vue({
+        el:"#box",
+        data:{
+            delVisible:false,
+            sid:"",
+            subList:[],
+            condition:{},
+            currentPage:1,
+            pageSize:5,
+            total:0
+        },
+        methods:{
+
+            search:function(){
+                var condition=this.condition;
+                var currentPage=this.currentPage;
+                var pageSize=this.pageSize;
+                condition.currentPage=currentPage;
+                condition.pageSize=pageSize;
+                //将对象类型转化为JSON格式
+                var conditionJson=JSON.stringify(condition);
+                //创建formData对象，以{key，value}格式存储ConditionJson
+                var formData=new FormData();
+                formData.append("conditionJson",conditionJson);
+                //声明请求信息
+                let option={
+                    url:"selectAllSubByCondition",
+                    method:"post",
+                    data:formData
+                }
+                //发送请求
+                var that=this;
+                axios(option).then(function(result){
+                    if(result.data.statue){
+                        that.subList=result.data.list;
+                        that.total=result.data.total;
+
+                    }else {
+                        alert(result.data.message)
+                    }
+
+                })
+
+            },
+
+            //当前页码数发生改变
+            handleCurrentChange:function(val){
+                this.currentPage=val;
+                this.selectAllSub();
+            },
+            //一页显示数据条目发生改变
+            handleSizeChange:function(val) {
+                this.pageSize=val;
+                this.selectAllSub();
+            },
+
+            selectAllSub:function() {
+                var that=this;
+                var currentPage=this.currentPage;
+                var pageSize=this.pageSize;
+                axios.get("selectAllSub?currentPage="+currentPage+"&pageSize="+pageSize).then(function(result){
+                    if(result.data.statue){
+                        that.subList=result.data.list;
+                        that.total=result.data.total;
+
+                    }else {
+                        alert(result.data.message)
+                    }
+
+                })
+            },
+
+            //打开提示框
+            openDelPanel:function (sid) {
+                this.delVisible=true;
+                this.sid=sid;
+            },
+            //删除操作
+            delSub:function () {
+                var sid=this.sid;
+                var that=this;
+                axios.get("delSub?sid="+sid).then(function(result){
+                    if(result.data.statue){
+                        that.delVisible=false;
+                        that.selectAllSub();
+                    }else {
+                        alert(result.data.message)
+                    }
+
+                })
+            },
+        },
+        mounted:function(){
+            this.selectAllSub();
+        }
+    })
+</script>
+</body>
+</html>

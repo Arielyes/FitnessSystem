@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/vue.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="js/index.js"></script>
+    <script src="js/axios.js"></script>
+
+    <style type="text/css">
+        body{
+            background-image: url(img/bg.png);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        #box{
+            width:300px;
+            height: 300px;
+            border: 1px solid black;
+            margin: 300px auto;
+        }
+        h1{
+            width: 100%;
+            text-align: center;
+            color: #ffffff;
+        }
+        .el-button{
+            margin-left: 120px;
+        }
+        .el-form-item__label{
+            color: #FFFFFF;
+        }
+    </style>
+
+</head>
+<body>
+<div id="box">
+
+    <h1>健身管理系统</h1>
+
+    <el-form inline="true" :model="user" label-width="80px">
+
+        <el-form-item label="账号" >
+            <el-input v-model="user.username"></el-input>
+        </el-form-item>
+
+        <el-form-item label="密码">
+            <el-input v-model="user.password"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button @click="login">登录</el-button>
+        </el-form-item>
+
+    </el-form>
+
+</div>
+<script type="text/javascript">
+    new Vue({
+        el:"#box",
+        data:{
+            user:{
+                username:"",
+                password:""
+            }
+        },
+        methods:{
+            login:function(){
+                var username=this.user.username;
+                var password=this.user.password;
+                axios.post("login?username="+username+"&password="+password).then(function (result) {
+                    if(result.data.statue) {
+
+                        location.href="index.html";
+
+                    }else {
+
+                        alert(result.data.message);
+
+                    }
+
+                })
+            }
+        }
+
+    })
+</script>
+</body>
+</html>

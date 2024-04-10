@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创建课程</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css"/>
+    <script src="js/vue.min.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/axios.js"></script>
+</head>
+<body>
+    <div id="box">
+        <el-form :model="subject" label-width="80px">
+            <el-form-item label="课程名称">
+                <el-input v-model="subject.sname"></el-input>
+            </el-form-item>
+            <el-form-item label="课程单价">
+                <el-input v-model="subject.price"></el-input>
+            </el-form-item>
+            <el-form-item label="教练名称">
+                <el-select v-model="subject.username" placeholder="请选择">
+                    <el-option v-for="user in userList" :label="user.name" :value="user.username"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="课程介绍">
+                <el-input v-model="subject.sdetail"></el-input>
+            </el-form-item>
+            <el-form-item label="参加人数">
+                <el-input v-model="subject.count"></el-input>
+            </el-form-item>
+            <el-form-item label="课程封面">
+                <el-upload action="" list-type="picture-card" :http-request="putImage" :on-preview="handlePictureCardPreview">
+                    <i class="el-icon-plus"></i>
+                </el-upload>
+                <el-dialog :visible.sync="dialogVisible">
+                    <img width="100%" :src="dialogImageUrl">
+                </el-dialog>
+            </el-form-item>
+            <el-form-item>
+                <el-button @click="addSubject">保存</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+    <script>
+        new Vue({
+            el:"#box",
+            data:{
+                dialogVisible:false,
+                subject:{},
+                userList:[],
+                imgFile:{},
+                dialogImageUrl:""
+            },
+            methods:{
+                handlePictureCardPreview:function(file){
+                    this.dialogImageUrl=file.url;
+                    this.dialogVisible=true;
+                },
+                putImage:function(param){
+                    this.imgFile=param.file;
+                },
+                addSubject:function () {
+                    var imgFile=this.imgFile;
+                    var subject = this.subject;
+                    //将对象转换为json格式
+                    var subjectJson = JSON.stringify(subject);
+                    //创建map集合，用来存储json数据
+                    var formData = new FormData();
+                    formData.append("subjectJson",subjectJson);
+                    formData.append("imgFile",imgFile);
+
+                    let option = {
+                        url:"addSubject",
+                        method:"post",
+                        data:formData
+                    }
+
+                    //发送请求
+                    var that = this;
+                    axios(option).then(function(result){//result后台返回给前端的数据
+                        if(result.data.statue){
+                            that.subject = {};
+                        }else{
+                            alert(result.data.message);
+                        }
+                    });
+                }
+            },
+            mounted:function(){
+                var that = this;
+                axios.post("selectAllCoach").then(function(result){//result后台返回给前端的数据
+                    if(result.data.statue){
+                        that.userList = result.data.list;
+                    }else{
+                        alert(result.data.message);
+                    }
+                });
+            }
+        })
+    </script>
+</body>
+</html>
